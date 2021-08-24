@@ -12,6 +12,7 @@ class PuertoRicoGISCode():
         self.cities_column = 'ADM1_ES'
         self.cities = self.puertorico[self.cities_column]
         print(self.cities)
+
     def showAllColumns(self):
         columns = self.puertorico.columns
         for col in columns:
@@ -47,7 +48,6 @@ class PuertoRicoGISCode():
         self.df_city_roads = gpd.clip(self.roads,self.df_city,keep_geom_type=True)
         fig, ax = plt.subplots(figsize=(12, 8))
 
-
         self.df_city_roads.plot(ax=ax, color='red', edgecolor='black')
         self.df_city.boundary.plot(ax=ax, color='black')
         # self.df_city.plot(color='red', edgecolor='black')
@@ -70,7 +70,7 @@ class PuertoRicoGISCode():
             0. Isla de Desecheo Marine Reserve
             1. Mayaguez
             2. Isla Monito
-            4. Mona
+            3. Mona
         '''
 
 
@@ -80,27 +80,7 @@ class PuertoRicoGISCode():
         self.df_city.plot(color='red', edgecolor='black')
         plt.show()
 
-    def showSpecificCity(self,city='',index=-1):
-        self.city = city
-        if(0<=index<=len(self.cities)):
-            self.city=self.cities[index]
 
-        print("City: ", self.city)
-
-        self.df_city = self.puertorico.loc[self.puertorico[self.cities_column]==self.city].reset_index(drop=True)
-        print(self.df_city)
-        for col in self.df_city.columns:
-            print(col," - ", self.df_city[col])
-
-        self.df_city_roads = gpd.clip(self.roads,self.df_city,keep_geom_type=True)
-        fig, ax = plt.subplots(figsize=(12, 8))
-
-
-        self.df_city_roads.plot(ax=ax, color='red', edgecolor='black')
-        self.df_city.boundary.plot(ax=ax, color='black')
-        # self.df_city.plot(color='red', edgecolor='black')
-
-        plt.show()
     def showGridCityRoads(self,city='',index=-1,clip=False):
         self.city = city
         if (0 <= index <= len(self.cities)):
@@ -111,8 +91,9 @@ class PuertoRicoGISCode():
         self.df_city = self.puertorico.loc[self.puertorico[self.cities_column] == self.city].reset_index(drop=True)
 
         xmin, ymin, xmax, ymax =self.df_city.total_bounds
-        length = (xmax-xmin)/250
-        wide = (ymax-ymin)/250
+        cuadritos = 250
+        length = (xmax-xmin)/cuadritos
+        wide = (ymax-ymin)/cuadritos
         # print((xmax-xmin),(ymax-ymin))
         cols = list(np.arange(xmin, xmax + wide, wide))
         rows = list(np.arange(ymin, ymax + length, length))
@@ -147,7 +128,7 @@ class PuertoRicoGISCode():
 if __name__ =="__main__":
     toolkit = PuertoRicoGISCode()
     # toolkit.showAllCities()
-    toolkit.showGridCityRoads(index=49)
+    toolkit.showSpecificCity(index=0)
     # toolkit.showAllCities()
 else:
     print("test wrong")
