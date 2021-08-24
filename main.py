@@ -80,8 +80,28 @@ class PuertoRicoGISCode():
         self.df_city.plot(color='red', edgecolor='black')
         plt.show()
 
+    def showSpecificCity(self,city='',index=-1):
+        self.city = city
+        if(0<=index<=len(self.cities)):
+            self.city=self.cities[index]
 
-    def showGridCity(self,city='',index=-1,clip=True):
+        print("City: ", self.city)
+
+        self.df_city = self.puertorico.loc[self.puertorico[self.cities_column]==self.city].reset_index(drop=True)
+        print(self.df_city)
+        for col in self.df_city.columns:
+            print(col," - ", self.df_city[col])
+
+        self.df_city_roads = gpd.clip(self.roads,self.df_city,keep_geom_type=True)
+        fig, ax = plt.subplots(figsize=(12, 8))
+
+
+        self.df_city_roads.plot(ax=ax, color='red', edgecolor='black')
+        self.df_city.boundary.plot(ax=ax, color='black')
+        # self.df_city.plot(color='red', edgecolor='black')
+
+        plt.show()
+    def showGridCityRoads(self,city='',index=-1,clip=False):
         self.city = city
         if (0 <= index <= len(self.cities)):
             self.city = self.cities[index]
@@ -91,8 +111,8 @@ class PuertoRicoGISCode():
         self.df_city = self.puertorico.loc[self.puertorico[self.cities_column] == self.city].reset_index(drop=True)
 
         xmin, ymin, xmax, ymax =self.df_city.total_bounds
-        length = (xmax-xmin)/25
-        wide = (ymax-ymin)/25
+        length = (xmax-xmin)/250
+        wide = (ymax-ymin)/250
         # print((xmax-xmin),(ymax-ymin))
         cols = list(np.arange(xmin, xmax + wide, wide))
         rows = list(np.arange(ymin, ymax + length, length))
@@ -102,21 +122,32 @@ class PuertoRicoGISCode():
             for y in rows[:-1]:
                 polygons.append(Polygon([(x, y), (x + wide, y), (x + wide, y + length), (x, y + length)]))
 
+
+
         self.grid = gpd.GeoDataFrame({self.cities_column: self.city,'geometry': polygons})
+        self.df_city_roads = gpd.clip(self.roads, self.df_city, keep_geom_type=True)
 
         if clip:
-            self.joined = gpd.clip(self.grid,self.df_city)
+            self.joined = gpd.clip(self.grid,self.df_city_roads)
         else:
-            self.joined = gpd.sjoin(self.grid,self.df_city)
+            self.joined = gpd.sjoin(self.grid,self.df_city_roads)
 
-        self.joined.plot(color='red', edgecolor='black')
+        # self.joined = gpd.clip(self.df_city, self.joined)
+
+        fig, ax = plt.subplots(figsize=(12, 8))
+
+        self.joined.plot(ax=ax, color='red', edgecolor='black')
+        self.df_city.boundary.plot(ax=ax, color='black')
+
+
+        plt.savefig('myimage.png', format='png', dpi=1200)
         plt.show()
         # grid.to_file("GridCities/"+str(self.city)+ ".shp")
 
 if __name__ =="__main__":
     toolkit = PuertoRicoGISCode()
     # toolkit.showAllCities()
-    toolkit.showSpecificCity(index=49)
+    toolkit.showGridCityRoads(index=49)
     # toolkit.showAllCities()
 else:
     print("test wrong")
