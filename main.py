@@ -4,14 +4,14 @@ import numpy as np
 import pandas as pd
 from shapely.geometry import Polygon
 
-
 class PuertoRicoGISCode():
-
     def __init__(self):
         # self.puertorico = gpd.read_file(r'Shapefiles/pri_admbnda_adm0_2019.shp')
         self.puertorico = gpd.read_file(r'Shapefiles/pri_admbnda_adm1_2019.shp')
+        self.roads = gpd.read_file(r'PRRoads/hotosm_pri_roads_lines.shp')
         self.cities_column = 'ADM1_ES'
         self.cities = self.puertorico[self.cities_column]
+        print(self.cities)
     def showAllColumns(self):
         columns = self.puertorico.columns
         for col in columns:
@@ -40,10 +40,43 @@ class PuertoRicoGISCode():
         print("City: ", self.city)
 
         self.df_city = self.puertorico.loc[self.puertorico[self.cities_column]==self.city].reset_index(drop=True)
-
+        print(self.df_city)
         for col in self.df_city.columns:
-            print(col," - ", self.df_city[col][0])
+            print(col," - ", self.df_city[col])
 
+        self.df_city_roads = gpd.clip(self.roads,self.df_city,keep_geom_type=True)
+        fig, ax = plt.subplots(figsize=(12, 8))
+
+
+        self.df_city_roads.plot(ax=ax, color='red', edgecolor='black')
+        self.df_city.boundary.plot(ax=ax, color='black')
+        # self.df_city.plot(color='red', edgecolor='black')
+
+        plt.show()
+
+    def split_polygon(self,city='',index=-1):
+        self.city = city
+        if (0 <= index <= len(self.cities)):
+            self.city = self.cities[index]
+
+        print("City: ", self.city)
+
+        self.df_city = self.puertorico.loc[self.puertorico[self.cities_column] == self.city].reset_index(drop=True)
+
+        polygons = list(self.df_city['geometry'][0])
+
+
+        '''
+            0. Isla de Desecheo Marine Reserve
+            1. Mayaguez
+            2. Isla Monito
+            4. Mona
+        '''
+
+
+        self.puertorico['geometry'].iloc[index] = polygons[1]
+        self.puertorico.to_file('Shapefiles/pri_admbnda_adm1_2019.shp')
+        self.df_city = self.puertorico.loc[self.puertorico[self.cities_column] == self.city].reset_index(drop=True)
         self.df_city.plot(color='red', edgecolor='black')
         plt.show()
 
@@ -83,6 +116,7 @@ class PuertoRicoGISCode():
 if __name__ =="__main__":
     toolkit = PuertoRicoGISCode()
     # toolkit.showAllCities()
-    toolkit.showGridCity(None,8)
+    toolkit.showSpecificCity(index=49)
+    # toolkit.showAllCities()
 else:
     print("test wrong")
