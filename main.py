@@ -116,7 +116,7 @@ class PuertoRicoGISCode():
 if __name__ =="__main__":
     toolkit = PuertoRicoGISCode()
     # toolkit.showAllCities()
-    toolkit.split_polygon(index=49)
+    toolkit.showSpecificCity(index=49)
     # toolkit.showAllCities()
 else:
     print("test wrong")
