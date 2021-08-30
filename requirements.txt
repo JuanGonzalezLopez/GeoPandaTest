@@ -1,6 +1,7 @@
 wheel
 pipwin
 numpy
+scipy
 pandas
 shapely
 gdal
