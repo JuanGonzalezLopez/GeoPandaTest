@@ -186,17 +186,17 @@ if __name__ =="__main__":
     # toolkit.showAllCities()
     #
     # # Step 2b. City
-    # toolkit.showSimpleCity(index=49)
+    toolkit.showSimpleCity(index=49)
     #
     # # Step 3. Grids
-    # toolkit.showGridCity(index=49,cuadritos=50)
+    toolkit.showGridCity(index=49,cuadritos=50)
     #
     # # Step 4. roads
-    # toolkit.showSpecificCity(index=49)
+    toolkit.showSpecificCity(index=49)
     #
     # # Step 5. Roads with grids
-    # toolkit.showGridCityRoads(index=49,cuadritos=250)
-
+    toolkit.showGridCityRoads(index=49,cuadritos=250)
+    
 
     # Extras
     # toolkit.showAllColumns()
