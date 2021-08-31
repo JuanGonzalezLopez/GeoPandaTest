@@ -104,6 +104,7 @@ class PuertoRicoGISCode():
 
         plt.savefig('myimage.png', format='png', dpi=1200)
         plt.show()
+        return self.joined
 
     def split_polygon(self,city='',index=-1):
         self.city = city
