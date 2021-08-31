@@ -5,6 +5,7 @@ scipy
 pandas
 shapely
 gdal
+pygeos
 fiona
 pyproj
 six
