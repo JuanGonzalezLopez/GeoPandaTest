@@ -132,7 +132,7 @@ class PuertoRicoGISCode():
         plt.show()
 
 
-    def showGridCityRoads(self,city='',index=-1,clip=False,cuadritos=250):
+    def showGridCityRoads(self,city='',index=-1,clip=False):
         self.city = city
         if (0 <= index <= len(self.cities)):
             self.city = self.cities[index]
@@ -142,6 +142,7 @@ class PuertoRicoGISCode():
         self.df_city = self.puertorico.loc[self.puertorico[self.cities_column] == self.city].reset_index(drop=True)
 
         xmin, ymin, xmax, ymax =self.df_city.total_bounds
+        cuadritos = 250
         length = (xmax-xmin)/cuadritos
         wide = (ymax-ymin)/cuadritos
         # print((xmax-xmin),(ymax-ymin))
@@ -177,12 +178,6 @@ class PuertoRicoGISCode():
 
 if __name__ =="__main__":
     toolkit = PuertoRicoGISCode()
-
-
-    # Step 1. Puerto Rico
-    toolkit.showWholeMap()
-
-    # # Step 2a. Cities
     # toolkit.showAllCities()
     #
     # # Step 2b. City
