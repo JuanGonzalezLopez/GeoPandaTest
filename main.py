@@ -246,17 +246,29 @@ class PuertoRicoGISCode():
         self.df_city.plot(color='red', edgecolor='black')
         plt.show()
 
-    def createHullPoints(self,filename):
+    def createHullPoints(self,filename,target="start"):
+        lat = "new_"+target+"_lat"
+        long = "new_"+target+"_long"
+
         df = pd.read_excel(filename)
-        points = df[['new_start_lat', 'new_start_long']]
-        points = points[points['new_start_lat'] >= 17].reset_index(drop=True)
-        points = points.rename(columns={"new_start_lat": "Latitude", "new_start_long": "Longitude"})
-        points.to_csv("./ride_data/Hull.csv",index=False)
+
+
+        points = df[[lat,long]]
+
+
+        points = points[points[lat] >= 17].reset_index(drop=True)
+        points = points.rename(columns={lat: "Latitude", long: "Longitude"})
+        points.to_csv("./ride_data/Hull_" +target + ".csv",index=False)
         points = gpd.GeoDataFrame(points, geometry=gpd.points_from_xy(points.Longitude, points.Latitude))
+
+
+
+
+
         return points
 
-    def createPointsInGridData(self,show=False):
-        points = self.createHullPoints('./ride_data/processed_ride_data_dic_24.xlsx')
+    def createPointsInGridData(self,show=False,filename='./ride_data/processed_ride_data_dic_24.xlsx'):
+        points = self.createHullPoints(filename)
         hull = self.concave_hull(points,alpha=250)
         mayaguez_grid = self.showGridCity(index=49, cuadritos=225)
         buffer = hull.buffer(.0005)
@@ -386,13 +398,15 @@ class PuertoRicoGISCode():
         plt.savefig('myimage.png', format='png', dpi=1200)
         plt.show()
         # grid.to_file("GridCities/"+str(self.city)+ ".shp")
-    def honeycomb(self,reso=10, show=True):
+
+
+    def honeycomb(self,reso=10, show=True,filename='./ride_data/processed_ride_data_dic_24.xlsx'):
         if (0<=reso<10):
             resostring="h3_0"+str(reso)
         else:
             resostring="h3_"+str(reso)
 
-        pointsrides = self.createHullPoints('./ride_data/processed_ride_data_dic_24.xlsx')
+        pointsrides = self.createHullPoints(filename)
         hull = self.concave_hull(pointsrides,alpha=250)
 
 
@@ -415,21 +429,89 @@ class PuertoRicoGISCode():
         print(self.grid)
         self.grid = self.grid.drop(columns=['lng', 'lat']).groupby(resostring).sum()
         self.grid = self.grid.h3.h3_to_geo_boundary()
-
-
+        self.maya_hex_city = maya_grid_buffer
+        self.points = pointsrides
+        self.buffer = buffer
         if (show):
             fig, ax = plt.subplots(figsize=(12, 8))
 
             self.grid.plot(ax=ax, color='yellow', edgecolor='black')
 
-            buffer.boundary.plot(ax=ax, edgecolor='black')
+            self.buffer.boundary.plot(ax=ax, edgecolor='black')
 
             pointsrides.plot(ax=ax, color='red', edgecolor='black')
 
             plt.savefig('honeycomb.png', format='png', dpi=1200)
             plt.show()
 
+    def createPointsInHexData(self,reso=10,show=False,filename='./ride_data/processed_ride_data_dic_24.xlsx'):
+        self.honeycomb(reso=reso,show=show,filename=filename)
 
+        temp_maya = self.grid.reset_index()
+        print(temp_maya)
+        mayageo = self.maya_hex_city['geometry']
+        # temp_maya = temp_maya.drop(['index_right'], axis='columns')
+        grid_shp = {}
+        grid_id = []
+        grid_geo = []
+        points_shp = {}
+        grid_id_points = []
+        points_geo = []
+
+        for i in range(0, mayageo.size):
+
+            invd_grid_square = temp_maya.iloc[[i]]
+            # print(self.points)
+            # print(invd_grid_square)
+            points_in_square = gpd.sjoin(self.points, invd_grid_square, op='within')
+            print(points_in_square)
+
+            fig, ax = plt.subplots(figsize=(12, 8))
+            invd_grid_square.plot(ax=ax,color='yellow', edgecolor='black')
+            points_in_square.plot(ax=ax, color='red', edgecolor='black')
+            plt.show()
+
+            grid_string = "hexa_" + str(i)
+            grid_id.append(grid_string)
+            grid_geo.append(invd_grid_square.reset_index(drop=True)['geometry'][0])
+
+            if not (points_in_square.empty):
+                try:
+                    for geo in points_in_square['geometry']:
+                        grid_id_points.append(grid_string)
+                        points_geo.append(geo)
+                except:
+                    pass
+
+        if (show):
+            fig, ax = plt.subplots(figsize=(12, 8))
+
+            self.grid.plot(ax=ax, color='yellow', edgecolor='black')
+
+            self.buffer.boundary.plot(ax=ax, edgecolor='black')
+
+            self.points.plot(ax=ax, color='red', edgecolor='black')
+
+            plt.savefig('honeycomb.png', format='png', dpi=1200)
+            plt.show()
+
+        grid_shp['Hex_ID'] = grid_id
+        grid_shp['geometry'] = grid_geo
+        points_shp['Hex_ID'] = grid_id_points
+        points_shp['geometry'] = points_geo
+
+        grid_shp = pd.DataFrame(grid_shp)
+        points_shp = pd.DataFrame(points_shp)
+
+
+        grid_shp = gpd.GeoDataFrame(grid_shp)
+        points_shp = gpd.GeoDataFrame(points_shp)
+
+
+        grid_shp.to_file('Grid_Points/Hex_with_IDs.shp')
+        points_shp.to_file('Grid_Points/Points_with_HexIDs.shp')
+        print(points_shp)
+        return grid_shp,points_shp
 
 if __name__ =="__main__":
     toolkit = PuertoRicoGISCode()
@@ -448,8 +530,8 @@ if __name__ =="__main__":
     # toolkit.showGridCityRoads(index=49,cuadritos=250)
     #
     # Step 6. Create Zone Points data/shapefile
-    toolkit.honeycomb(reso=10)
-
+    # toolkit.honeycomb(reso=10)
+    toolkit.createPointsInHexData(show=True)
     # Extras
     # toolkit.showAllColumns()
     # toolkit.split_polygon(index=49)

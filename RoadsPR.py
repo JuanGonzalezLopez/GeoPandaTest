@@ -1,16 +1,21 @@
 import geopandas as gpd
 import matplotlib.pyplot as plt
-# Importing an ESRIShapefile and plotting it using GeoPandas
-districts = gpd.read_file(r'/Users/gustavocalderon/PycharmProjects/GeoPandaTest/PR/tl_2015_72_prisecroads.shp')
-districts.plot(cmap = 'hsv', edgecolor = 'black')
-plt.show()
+import numpy as np
+import pandas as pd
+import pygeos
+from shapely.geometry import Polygon,MultiLineString,MultiPolygon
+from scipy.spatial import Delaunay
+from shapely.ops import polygonize, cascaded_union
+import h3pandas
+
+
+
 #####################################
 
 
-def showAllColumns(districts):
-    columns = districts.columns
-    for col in columns:
-        print(districts[col].head())
-print(showAllColumns(districts))
+ride_data = pd.read_excel('./ride_data/processed_ride_data_dic_24.xlsx')
+zone_data = pd.read_csv('ride_hex_data.csv')
+
 
 #########################################
+
