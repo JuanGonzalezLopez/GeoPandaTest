@@ -5,11 +5,8 @@ scipy
 pandas
 openpyxl
 shapely
-gdal
 pygeos
-fiona
 pyproj
 six
 rtree
-geopandas
 matplotlib
