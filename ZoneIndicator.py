@@ -181,7 +181,7 @@ class testingZones():
         print(allpoints)
 
 
-        allpoints = allpoints[allpoints["Latitude"] >= 17].reset_index(drop=True)
+        allpoints = allpoints[(allpoints["Latitude"] >= 17) & (allpoints["Longitude"] <= -65)].reset_index(drop=True)
         allpoints.to_csv("./ExtraCSVs/allpoints.csv",index=False)
 
         print(allpoints)
@@ -190,6 +190,7 @@ class testingZones():
         plt.show()
 
         return allpoints
+
     def honeycomb(self,reso=10, show=True,filename='./ride_data/processed_ride_data_dic_24.xlsx'):
         if (0<=reso<10):
             resostring="h3_0"+str(reso)

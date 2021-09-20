@@ -3,6 +3,7 @@ pipwin
 numpy
 scipy
 pandas
+openpyxl
 shapely
 gdal
 pygeos
