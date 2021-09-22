@@ -10,3 +10,4 @@ pyproj
 six
 rtree
 matplotlib
+h3pandas
