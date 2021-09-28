@@ -15,7 +15,7 @@ X=df.loc[:,['Latitude','Longitude']]
 # X.head(10)
 print(X)
 
-# Elbow Curve: 10 Clusters
+# Elbow Curve: 12 Clusters
 # K_clusters = range(1,100)
 # kmeans = [KMeans(n_clusters=i) for i in K_clusters]
 # y_axis = df[['Latitude']]
@@ -28,22 +28,15 @@ print(X)
 # plt.title('Elbow Curve')
 # plt.show()
 
-#Cluster
-# kmeans = KMeans(n_clusters = 10, init = 'k-means++')
-# kmeans.fit(X[X.columns[1:3]],)
-# X['clusters_label'] = kmeans.fit_predict(X[X.columns[1:3]])
-# centers = kmeans.cluster_centers_
-# labels = kmeans.predict(X[X.columns[1:3]])
-# X = X.head(10)
-# print(X)
 
 ###################################################
 
 kmeans = KMeans(n_clusters=12).fit(df)
+print(kmeans)
 centroids = kmeans.cluster_centers_
 print(centroids)
-plt.scatter(df['Latitude'], df['Longitude'], c = kmeans.labels_.astype(float),s=50, alpha=0.5)
-plt.scatter(centroids[:, 0], centroids[:, 1], c = 'red', s=50)
+plt.scatter(df['Longitude'], df['Latitude'], c = kmeans.labels_.astype(float),s=50, alpha=0.5)
+plt.scatter(centroids[:, 1], centroids[:, 0], c = 'red', s=50)
 plt.show()
 
 ###############################################
