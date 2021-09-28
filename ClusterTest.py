@@ -39,7 +39,7 @@ print(X)
 
 ###################################################
 
-kmeans = KMeans(n_clusters=10).fit(df)
+kmeans = KMeans(n_clusters=12).fit(df)
 centroids = kmeans.cluster_centers_
 print(centroids)
 plt.scatter(df['Latitude'], df['Longitude'], c = kmeans.labels_.astype(float),s=50, alpha=0.5)

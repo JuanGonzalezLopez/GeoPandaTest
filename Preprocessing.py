@@ -141,8 +141,8 @@ class Restructuring():
                 for d in unique_doy:
                     for y in unique_year:
 
-                        slice_start = self.data[(self.data['Hex_start']==h)&(self.data['interval_start']==t)&(self.data['day_of_year']==d)&(self.data['year']==y)].reset_index(drop=True)
-                        slice_end = self.data[(self.data['Hex_end']==h)&(self.data['interval_end']==t)&(self.data['day_of_year']==d)&(self.data['year']==y)].reset_index(drop=True)
+                        slice_start = self.data.loc[(self.data['Hex_start']==h)&(self.data['interval_start']==t)&(self.data['day_of_year']==d)&(self.data['year']==y)].reset_index(drop=True)
+                        slice_end = self.data.loc[(self.data['Hex_end']==h)&(self.data['interval_end']==t)&(self.data['day_of_year']==d)&(self.data['year']==y)].reset_index(drop=True)
 
 
                         if(not((slice_start.empty) and (slice_end.empty))):
