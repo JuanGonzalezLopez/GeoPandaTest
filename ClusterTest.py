@@ -7,12 +7,9 @@ import csv
 
 # Create DataFrame
 df = pd.read_csv('./ride_data/HullEx.csv')
-# df = df.head(n=10)
-# print(df)
 df = df[df['Latitude'] >= 17].reset_index(drop=True)  # Remove invalid coordinates
 df.dropna(axis = 0, how = 'any', subset=['Latitude', 'Longitude'], inplace = True)
 X=df.loc[:,['Latitude','Longitude']]
-# X.head(10)
 print(X)
 
 # Elbow Curve: 12 Clusters
@@ -40,10 +37,6 @@ plt.scatter(centroids[:, 1], centroids[:, 0], c = 'red', s=50)
 plt.show()
 
 ###############################################
-
-# Visualise
-# X.plot.scatter(x = 'Latitude', y = 'Longitude', c = labels, s=50, cmap = 'viridis')
-# plt.scatter(centers[:, 0], centers[:, 1], c = 'black', s=200, alpha=0.5)
 
 
 
