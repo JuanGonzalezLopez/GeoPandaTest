@@ -8,7 +8,7 @@ import csv
 
 class Clusters:
         # DF is the data from the rides
-        def __init__(self, df, clust = 12):
+        def __init__(self,df, clust = 12):
                 self.df = df
                 self.clust = clust
         # Create DataFrame
@@ -18,18 +18,24 @@ class Clusters:
                 self.df.dropna(axis = 0, how = 'any', subset=['Latitude', 'Longitude'], inplace = True)
                 X=self.df.loc[:,['Latitude','Longitude']]
                 print(X)
-                self.kmeans = KMeans(n_clusters=self.clust).fit(df)
-                self.centroids = self.kmeans.cluster_centers_
-                print(self.kmeans)
-                print(self.centroids)
+                kmeans = KMeans(n_clusters=self.clust).fit(df)
+                centroids = kmeans.cluster_centers_
+                print(kmeans)
+                print(centroids)
+                df['Labels'] = kmeans.labels_.astype(float)
+                print(df['Labels'])
 
 
         def plotCluster(self):
                 self.createCluster()
                 plt.scatter(self.df['Longitude'], self.df['Latitude'], c = self.kmeans.labels_.astype(float),s=50, alpha=0.5)
                 plt.scatter(self.centroids[:, 1], self.centroids[:, 0], c = 'red', s=50)
+                # print(self.kmeans.labels_.astype(float))
                 plt.show()
 
+tool = Clusters(pd.read_csv('./ride_data/HullEx.csv'))
+tool.createCluster()
+tool.plotCluster()
                 # Elbow Curve: 12 Clusters
                 # K_clusters = range(1,100)
                 # kmeans = [KMeans(n_clusters=i) for i in K_clusters]
