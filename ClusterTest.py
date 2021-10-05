@@ -11,7 +11,7 @@ class Clusters:
         def __init__(self,df, clust = 12):
                 self.df = df
                 self.clust = clust
-        # Create DataFrame
+
         def createCluster(self):
                 df = pd.read_csv('./ride_data/HullEx.csv')
                 df = df[df['Latitude'] >= 17].reset_index(drop=True)  # Remove invalid coordinates
@@ -26,16 +26,15 @@ class Clusters:
                 print(df['Labels'])
 
 
-        def plotCluster(self):
-                self.createCluster()
-                plt.scatter(self.df['Longitude'], self.df['Latitude'], c = self.kmeans.labels_.astype(float),s=50, alpha=0.5)
-                plt.scatter(self.centroids[:, 1], self.centroids[:, 0], c = 'red', s=50)
-                # print(self.kmeans.labels_.astype(float))
+        # def plotCluster(self):
+        #         self.createCluster()
+                plt.scatter(df['Longitude'], df['Latitude'], c = kmeans.labels_.astype(float),s=50, alpha=0.5)
+                plt.scatter(centroids[:, 1], centroids[:, 0], c = 'red', s=50)
                 plt.show()
 
 tool = Clusters(pd.read_csv('./ride_data/HullEx.csv'))
 tool.createCluster()
-tool.plotCluster()
+# tool.plotCluster()
                 # Elbow Curve: 12 Clusters
                 # K_clusters = range(1,100)
                 # kmeans = [KMeans(n_clusters=i) for i in K_clusters]
