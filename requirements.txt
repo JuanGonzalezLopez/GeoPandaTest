@@ -11,3 +11,5 @@ six
 rtree
 matplotlib
 h3pandas
+sklearn
+seaborn

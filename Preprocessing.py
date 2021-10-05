@@ -7,7 +7,7 @@ from multiprocessing import Pool
 
 
 class datecolumns():
-    def __init__(self,data, production=True,step_interval=5,interval_range=2):
+    def __init__(self,data,step_interval=5,interval_range=2):
 
         self.data = data.dropna().reset_index(drop=True)
         if(60%step_interval==0):
@@ -19,10 +19,10 @@ class datecolumns():
             step_interval = (5 * round(step_interval / 5))
             self.step_interval = step_interval/60
 
-        if (production):
-            self.target = "start"
-        else:
-            self.target = "end"
+        # if (production):
+        #     self.target = "start"
+        # else:
+        #     self.target = "end"
         # self.data[self.target+'_time'] = pd.to_datetime(self.data[self.target+'_time'])
         self.data['dt'] = pd.to_datetime(self.data['dt'])
         minimum_hour = int(self.data['start_time_scalar'].min())

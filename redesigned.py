@@ -5,7 +5,7 @@ import math
 
 from multiprocessing import Pool
 
-class testingredisign():
+class grouping():
     def __init__(self,data):
         dataProd = data.groupby(['Hex_start','interval_start','day_of_year','year','dt']).size().reset_index(name='Production')
         dataProd = dataProd.rename(columns={'Hex_start':"Hex",'interval_start':"interval"})
@@ -20,12 +20,13 @@ class testingredisign():
 
         print(data)
         data.to_csv('Test_RunPA.csv')
+        return data
 
 
 def main():
     data = pd.read_csv("Test_Run.csv")
 
-    inter = testingredisign(data)
+    inter = grouping(data)
 
     # df_splitted = parallelize_dataframe(data, use_preprocessing, n_cores=10)
 
