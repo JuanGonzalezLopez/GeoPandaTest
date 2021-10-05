@@ -1,5 +1,4 @@
 # GeoPandaTest
-Testing the GeoPanda Library
 By Juan Marcos Gonzalez Lopez | Gustavo Calderon | Matthew Mendoza
 
 This will help automatize the need to manually divide zones by creating hexagonal divisions.
