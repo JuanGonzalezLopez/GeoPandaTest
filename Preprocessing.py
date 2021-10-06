@@ -7,9 +7,12 @@ from multiprocessing import Pool
 
 
 class datecolumns():
-    def __init__(self,data,step_interval=5,interval_range=2):
-
-        self.data = data.dropna().reset_index(drop=True)
+    def __init__(self,data=None, filename: str = './Output/Ride_data_with_hex.csv',step_interval=5,interval_range=2):
+        if(not(type(data)==type(None))):
+            self.data = data
+        else:
+            self.data = pd.read_csv(filename)
+        self.data = self.data.dropna().reset_index(drop=True)
         if(60%step_interval==0):
             self.step_interval = step_interval/60
 
@@ -83,11 +86,13 @@ class datecolumns():
     #
     #     return self.unique_time[row['interval_start']+1]
 
-    def intervalize(self):
+    def intervalize(self,output="./Output/PreprocessedIntervals.csv"):
         self.dateify()
 
         self.data['interval_start'] = self.data.apply(self.interval,axis=1)
         self.data['interval_end'] =self.data.apply(self.intervalend,axis=1)
+
+        self.data.to_csv(output,index=False)
         return self.data
 
 class Restructuring():

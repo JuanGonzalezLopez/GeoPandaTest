@@ -544,7 +544,7 @@ class PuertoRicoGISCode():
         plt.show()
         # grid.to_file("GridCities/"+str(self.city)+ ".shp")
 
-    def honeycomb(self, reso=10, show=True, filename='./ride_data/processed_ride_data_dic_24.xlsx',data=None):
+    def honeycomb(self, reso=10, show=True, filename='./Data/processed_ride_data_dic_24.xlsx',data=None):
         if (0 <= reso < 10):
             resostring = "h3_0" + str(reso)
         else:
@@ -586,7 +586,7 @@ class PuertoRicoGISCode():
             plt.savefig('honeycomb.png', format='png', dpi=1200)
             plt.show()
 
-    def createPointsInHexData(self, reso=10, show=False, filename='./ride_data/processed_ride_data_dic_24.xlsx',data=None):
+    def createPointsInHexData(self, reso=10, show=False, filename='./Data/processed_ride_data_dic_24.xlsx',data=None):
         self.honeycomb(reso=reso, show=show, filename=filename,data=data)
 
         temp_maya = self.grid.reset_index()
@@ -653,7 +653,7 @@ class PuertoRicoGISCode():
         print(points_shp)
         return grid_shp, points_shp
 
-    def ZoneIndicator(self, reso=10, show=False, filename='./ride_data/processed_ride_data_dic_24.xlsx',
+    def ZoneIndicator(self, reso=10, show=False, filename='./Data/processed_ride_data_dic_24.xlsx',
                       output="ride_hex_data.csv"):
         self.honeycomb(reso=reso, show=show, filename=filename)
 

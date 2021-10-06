@@ -12,11 +12,17 @@ from datetime import datetime
 
     #####################################
 class HexagonData():
-    def __init__(self,filename= './ride_data/processed_ride_data_dic_24.xlsx',data=None):
-        if(data!=None):
+    def __init__(self,filename1= './Data/processed_ride_data_dic_24.xlsx',filename2='./Output/ride_hex_data.csv',data=None,zone=None):
+        if(not(type(data)==type(None))):
             self.ride_data = data
         else:
-            self.ride_data = pd.read_excel(filename)
+            self.ride_data = pd.read_excel(filename1)
+        if(not(type(zone)==type(None))):
+
+            self.zone_data = zone
+        else:
+            self.zone_data = pd.read_csv(filename2)
+
 
         columns = self.ride_data.columns.values
         for col in columns:
@@ -24,7 +30,6 @@ class HexagonData():
             print(col,self.ride_data[col].isnull().sum())
 
 
-        self.zone_data = pd.read_csv('ride_hex_data.csv')
 
         self.ride_data['Hex_start'] = np.nan
         self.ride_data['Hex_end'] = np.nan

@@ -6,35 +6,58 @@ from sklearn.cluster import KMeans
 import seaborn as sns; sns.set()
 import csv
 
+
+
+
 class Clusters:
         # DF is the data from the rides
-        def __init__(self,df, clust = 12):
+        def __init__(self,df, clust = 12,target='start'):
                 self.df = df
                 self.clust = clust
+                self.target="new_"+target
 
         def createCluster(self):
-                df = pd.read_csv('./ride_data/HullEx.csv')
-                df = df[df['Latitude'] >= 17].reset_index(drop=True)  # Remove invalid coordinates
-                self.df.dropna(axis = 0, how = 'any', subset=['Latitude', 'Longitude'], inplace = True)
-                X=self.df.loc[:,['Latitude','Longitude']]
+                latitude=self.target+"lat"
+                longitude = self.target+"long"
+                self.df = self.df[self.df[latitude] >= 17].reset_index(drop=True)  # Remove invalid coordinates
+                self.df.dropna(axis = 0, how = 'any', subset=[latitude, longitude], inplace = True)
+                X=self.df[:,[latitude,longitude]]
                 print(X)
-                kmeans = KMeans(n_clusters=self.clust).fit(df)
-                centroids = kmeans.cluster_centers_
-                print(kmeans)
-                print(centroids)
-                df['Labels'] = kmeans.labels_.astype(float)
-                print(df['Labels'])
+                self.kmeans = KMeans(n_clusters=self.clust).fit(self.df)
+                self.centroids = self.kmeans.cluster_centers_
+                print(self.kmeans)
+                print(self.centroids)
+                self.df['Labels'] = self.kmeans.labels_.astype(float)
+                print(self.df['Labels'])
+                self.latitude= latitude
+                self.longitude=longitude
+
+        def plotCluster(self):
+                """
+                        Use ./Output/PreprocessedIntervals.csv as your df (when initializing object)
+
+                        Create cluster labels using the new_ (start,long) _lat andnew_ (start,long) _long. [3,4,0,....1,9]
+                        Do it for both start and end coordinates
+                        Create column:
+                                self.df['cluster_start'] =  cluster labels of start
+                                self.df['cluster_end'] =  cluster labels of end
+                                self.df.to_csv('./Output/nombredecsv.csv')
+                        return self.df
 
 
-        # def plotCluster(self):
-        #         self.createCluster()
-                plt.scatter(df['Longitude'], df['Latitude'], c = kmeans.labels_.astype(float),s=50, alpha=0.5)
-                plt.scatter(centroids[:, 1], centroids[:, 0], c = 'red', s=50)
+
+                """
+                self.createCluster()
+                plt.scatter(self.df[self.longitude], self.df[self.latitude], c = self.kmeans.labels_.astype(float),s=50, alpha=0.5)
+                plt.scatter(self.centroids[:, 1], self.centroids[:, 0], c = 'red', s=50)
                 plt.show()
 
-tool = Clusters(pd.read_csv('./ride_data/HullEx.csv'))
-tool.createCluster()
-# tool.plotCluster()
+
+df = pd.read_csv('./Output/PreprocessedIntervals.csv')
+
+tool = Clusters(df)
+# tool.createCluster()
+tool.plotCluster()
                 # Elbow Curve: 12 Clusters
                 # K_clusters = range(1,100)
                 # kmeans = [KMeans(n_clusters=i) for i in K_clusters]

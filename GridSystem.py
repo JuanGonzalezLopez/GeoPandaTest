@@ -8,7 +8,7 @@ from scipy.spatial import Delaunay
 from shapely.ops import polygonize, cascaded_union
 import h3pandas
 class PuertoRicoGISCode():
-    def __init__(self, puertorico: object, roads: object, column: str = 'ADM1_ES') -> object:
+    def __init__(self, puertorico: object, roads: object, column: str = 'ADM1_ES',index: int = -1, city: str = '') -> object:
         '''
             This is the first step to building your Grid zones
             There are a couple of methods here to produce different types of zone divisions
@@ -74,6 +74,10 @@ class PuertoRicoGISCode():
         self.roads = roads
         self.cities_column = column
         self.cities = self.puertorico[self.cities_column]
+        self.city = city
+        if (0 <= index <= len(self.cities)): # Check if the index is between 0 or the amount of cities that the shapefile has, otherwise it will use the city's string argument to search the city's name
+            self.city = self.cities[index]
+
 
     def showAllColumns(self):
         """
@@ -112,7 +116,7 @@ class PuertoRicoGISCode():
 
         self.puertorico.plot(cmap='jet', edgecolor='black', column=self.cities_column)
         plt.show()
-    def showSimpleCity(self, city: str = '', index: int = -1) -> object:
+    def showSimpleCity(self) -> object:
         """
             Will Plot the city that is specified in the inputs.
             Two ways of specifying a city:
@@ -125,9 +129,7 @@ class PuertoRicoGISCode():
 
             HINT: Use the showAllCities if you don't know any cities nor their index in the column. It will print out the name with the index next to it.
         """
-        self.city = city
-        if (0 <= index <= len(self.cities)): # Check if the index is between 0 or the amount of cities that the shapefile has, otherwise it will use the city's string argument to search the city's name
-            self.city = self.cities[index]
+
 
         print("City: ", self.city)
 
@@ -141,7 +143,7 @@ class PuertoRicoGISCode():
         plt.show() # shows it
         return self.df_city
 
-    def showSpecificCity(self, city: str = '', index: int = -1) -> object:
+    def showSpecificCity(self) -> object:
 
         """
             Will Plot the city WITH ROADS that is specified in the inputs.
@@ -155,9 +157,7 @@ class PuertoRicoGISCode():
 
             HINT: Use the showAllCities if you don't know any cities nor their index in the column. It will print out the name with the index next to it.
         """
-        self.city = city
-        if(0<=index<=len(self.cities)): # Check if the index is between 0 or the amount of cities that the shapefile has, otherwise it will use the city's string argument to search the city's name
-            self.city=self.cities[index]
+
 
         self.df_city = self.showSimpleCity(self.city)
 
@@ -193,7 +193,7 @@ class PuertoRicoGISCode():
                         points.append(list(point))
         return points
 
-    def showGridCity(self, city: str = '', index: int = -1, clip: bool = True, cuadritos: int = 50) -> object:
+    def showGridCity(self, clip: bool = True, cuadritos: int = 50) -> object:
         """
 
         :param city: String of the name of the city. Must be written in the same way it is in the cities' column
@@ -202,9 +202,7 @@ class PuertoRicoGISCode():
         :param cuadritos: Identify the size, the higher the number the SMALLER the squares/grid
         :return: the square grid of city.
         """
-        self.city = city
-        if (0 <= index <= len(self.cities)): # Check if the index is between 0 or the amount of cities that the shapefile has, otherwise it will use the city's string argument to search the city's name
-            self.city = self.cities[index]
+
 
         print("City: ", self.city)
 
@@ -288,7 +286,7 @@ class PuertoRicoGISCode():
         m = MultiLineString(edge_points)
         triangles = list(polygonize(m))
         return gpd.GeoDataFrame({"geometry": [cascaded_union(triangles)]}, index=[0], crs=points_gdf.crs)
-    def split_polygon(self, city: str = '', index: int = -1) -> object:
+    def split_polygon(self) -> object:
 
         """
             IGNORE!!!!!
@@ -298,9 +296,7 @@ class PuertoRicoGISCode():
             :param index: Integer of the index of the city in the cities' column
             :return: the polygon inside the polygon
         """
-        self.city = city
-        if (0 <= index <= len(self.cities)):
-            self.city = self.cities[index]
+
 
         print("City: ", self.city)
 
@@ -317,35 +313,58 @@ class PuertoRicoGISCode():
         '''
 
 
-        self.puertorico['geometry'].iloc[index] = polygons[1]
+        self.puertorico['geometry'].iloc[49] = polygons[1]
         self.puertorico.to_file('Shapefiles/pri_admbnda_adm1_2019.shp')
         self.df_city = self.puertorico.loc[self.puertorico[self.cities_column] == self.city].reset_index(drop=True)
         self.df_city.plot(color='red', edgecolor='black')
         plt.show()
 
-    def createHullPoints(self, filename: str, target: str = "start",data=None) -> object:
+    def createHullPoints(self, filename: str='./Data/processed_ride_data_dic_24.xlsx', target: str = "start",data=None) -> object:
         """
         Will extract the coordinate floats from the columns inside the ride data and convert them to points.
             :param filename: the name of the data excel file
             :param target: specify if you want the starting coordinates or the ending coordinates
             :return: Geopandas geodataframe of points extracted from the coordinates
         """
-        if(data!=None):
+        if(not(type(data)==type(None))):
             df = data
         else:
             df = pd.read_excel(filename)
         lat = "new_"+target+"_lat"
         long = "new_"+target+"_long"
-        points = df[[lat,long]]
+        df['target'] = target
+        points = df[['ride_id','target',lat,long]]
         points = points[points[lat] >= 17].reset_index(drop=True)
         points = points.rename(columns={lat: "Latitude", long: "Longitude"})
-        points.to_csv("./ride_data/Hull_" +target + ".csv",index=False)
+        points.to_csv("./Output/Hull_" +target + ".csv",index=False)
         points = gpd.GeoDataFrame(points, geometry=gpd.points_from_xy(points.Longitude, points.Latitude))
         return points
+    def createHullGeo(self,points):
+        points = gpd.GeoDataFrame(points, geometry=gpd.points_from_xy(points.Longitude, points.Latitude))
+        return points
+    def StartEndConcat(self,filename='./Data/processed_ride_data_dic_24.xlsx',data=None):
+        if (not (type(data) == type(None))):
+            df = data
+        else:
+            df = pd.read_excel(filename)
+        pointsridesStart = self.createHullPoints(data=df,target='start')
+        pointsridesEnd = self.createHullPoints(data=df,target='end')
+        allpoints = pd.concat([pointsridesStart,pointsridesEnd]).reset_index(drop=True)
+        allpoints= self.createHullGeo(allpoints)
+        print(allpoints)
 
 
+        allpoints = allpoints[(allpoints["Latitude"] >= 17) & (allpoints["Longitude"] <= -65)].reset_index(drop=True)
+        allpoints.to_csv("./Output/allpoints.csv",index=False)
 
-    def showGridCityRoads(self, city: str = '', index: int = -1, clip: bool = False) -> object:
+        print(allpoints)
+
+        allpoints.plot()
+        plt.show()
+
+        return allpoints
+
+    def showGridCityRoads(self, clip: bool = False) -> object:
         """
             Instead of having a Grid system of the whole city, it will return a Grid system where it interacts/intersects with any road
             Could be useful to create blocks of grids from street blocks.
@@ -357,9 +376,7 @@ class PuertoRicoGISCode():
         :param clip: Boolean if you want to join or clip, default is to join
         :return:
         """
-        self.city = city
-        if (0 <= index <= len(self.cities)):
-            self.city = self.cities[index]
+
 
         print("City: ", self.city)
 
@@ -410,45 +427,49 @@ class PuertoRicoGISCode():
         :param filename: ride data excel filename
         :return:
         """
-
-        # dude to how the library works, it single digits need to have a leading zero.
-        if (0<=reso<10):
-            resostring="h3_0"+str(reso)
+        if (not (type(data) == type(None))):
+            df = data
         else:
-            resostring="h3_"+str(reso)
+            df = pd.read_excel(filename)
+        # due to how the library works, if it's single digits  it needs to have a leading zero.
+        if (0 <= reso < 10):
+            resostring = "h3_0" + str(reso)
+        else:
+            resostring = "h3_" + str(reso)
 
-        # Creates points from the ride data
-        pointsrides = self.createHullPoints(filename,data=data)
-        # Creates concave hull from the ride points. Will create an approximate of the Service Area
-        hull = self.concave_hull(pointsrides,alpha=250)
+        pointsrides = self.StartEndConcat(data=df)
+        hull = self.concave_hull(pointsrides, alpha=250)
 
-        # Creates a temporal grid zonal system to be used to conver to hexagonal system.
-        mayaguez_grid = self.showGridCity(index=49, cuadritos=250)
-        # To improve service area approximation, we create a buffer in order to capture what the possible service area might be.
+        mayaguez_grid = self.showGridCity(cuadritos=250)
+
         buffer = hull.buffer(.0005)
         # Creates a GeoDataFrame from the buffer
+
         bufferdf = gpd.GeoDataFrame(geometry=gpd.GeoSeries(buffer))
-        # Joins the grid zonal system with the service area buffer system.
         maya_grid_buffer = gpd.sjoin(mayaguez_grid, bufferdf)
-        # finds all the points from the grid's squares that are inside the service area. (corners of each square)
+        # Joins the grid zonal system with the service area buffer system.
+
         points = self.points_from_polygons(maya_grid_buffer.geometry)
-        # convert to array.
         points = np.array(points)
-        # Converts to longitude and latitude coordinates (points->coordinates)
         geopoints = {"lng": points[:, 0], "lat": points[:, 1]}
+        # finds all the points from the grid's squares that are inside the service area. (corners of each square)
+        # convert to array.
+        # Converts to longitude and latitude coordinates (points->coordinates)
         # Convert longitude and latitude dictionary to a dataframe that has a column for each.
+
         geopoints = pd.DataFrame(geopoints)
         # from these longitude/latitude coordinates that came from the squares of the grid inside the Service area, we convert them to Hexagons.
+
         self.grid = geopoints.h3.geo_to_h3(reso)
-        # print(self.grid)
-        # Magic: ~~~~~~
+        print(self.grid)
         self.grid = self.grid.drop(columns=['lng', 'lat']).groupby(resostring).sum()
         self.grid = self.grid.h3.h3_to_geo_boundary()
+        temp = self.grid.copy()
+        self.size = len(temp.geometry.values)
         self.maya_hex_city = maya_grid_buffer
-        self.points = pointsrides #creates global variable
+        self.points = pointsrides
         self.buffer = buffer
-        # Magic ends: ~~~~~~
-        if (show):# Plots it
+        if (show):
             fig, ax = plt.subplots(figsize=(12, 8))
 
             self.grid.plot(ax=ax, color='yellow', edgecolor='black')
@@ -457,10 +478,9 @@ class PuertoRicoGISCode():
 
             pointsrides.plot(ax=ax, color='red', edgecolor='black')
 
-            plt.savefig('honeycomb.png', format='png', dpi=1200)
+            plt.savefig('./Images_plots/honeycomb.png', format='png', dpi=1200)
             plt.show()
-
-    def createPointsInHexData(self,reso=10,show=False,filename='./ride_data/processed_ride_data_dic_24.xlsx'):
+    def createPointsInHexData(self,reso=10,show=False,filename='./Data/processed_ride_data_dic_24.xlsx'):
         self.honeycomb(reso=reso,show=show,filename=filename)
 
         temp_maya = self.grid.reset_index()
@@ -550,7 +570,7 @@ class PuertoRicoGISCode():
 
         temp_maya = self.grid.reset_index()
         print(temp_maya)
-        mayageo = self.maya_hex_city['geometry']
+        # mayageo = self.maya_hex_city['geometry']
         # temp_maya = temp_maya.drop(['index_right'], axis='columns')
         # grid_df = {}
         # grid_id = []
@@ -560,6 +580,7 @@ class PuertoRicoGISCode():
         ride_id = []
         target = []
         points_geo = []
+        print(self.size)
         for i in range(0, self.size):
 
             invd_grid_square = temp_maya.iloc[[i]]
@@ -575,7 +596,6 @@ class PuertoRicoGISCode():
             grid_string = "hexa_" + str(i)
             # grid_id.append(grid_string)
             # grid_geo.append(invd_grid_square.reset_index(drop=True)['geometry'][0])
-
             if not (points_in_square.empty):
                 try:
                     for index,row in points_in_square.iterrows():
@@ -591,39 +611,39 @@ class PuertoRicoGISCode():
         points_df['ride_id'] = ride_id
         points_df['target'] = target
         points_df['geometry'] = points_geo
-
+        print((len(grid_id_points),len(ride_id),len(target),len(points_geo)))
         points_df = pd.DataFrame(points_df)
         print(points_df)
         points_df.to_csv(output,index=False)
         return points_df
 
-if __name__ =="__main__":
-    puertorico = gpd.read_file(r'Shapefiles/pri_admbnda_adm1_2019.shp')
-    roads = gpd.read_file(r'PRRoads/hotosm_pri_roads_lines.shp')
-    toolkit = PuertoRicoGISCode(puertorico,roads)
-    # toolkit.showAllCities()
-    #
-    # # Step 2b. City
-    # toolkit.showSimpleCity(index=49)
-    # #
-    # # # Step 3. Grids
-    # toolkit.showGridCity(index=49,cuadritos=50)
-    # #
-    # # # Step 4. roads
-    # toolkit.showSpecificCity(index=49)
-    # #
-    # # # Step 5. Roads with grids
-    # toolkit.showGridCityRoads(index=49,cuadritos=250)
-    #
-    # Step 6. Create Zone Points data/shapefile
-    # toolkit.honeycomb(reso=10)
-    toolkit.createPointsInHexData(show=True)
-
-
-    # Main Step: Creates data of hex and rideID
-    toolkit.ZoneIndicator()
-    # Extras
-    # toolkit.showAllColumns()
-    # toolkit.split_polygon(index=49)
-else:
-    print("test wrong")
+# if __name__ =="__main__":
+#     puertorico = gpd.read_file(r'Shapefiles/pri_admbnda_adm1_2019.shp')
+#     roads = gpd.read_file(r'PRRoads/hotosm_pri_roads_lines.shp')
+#     toolkit = PuertoRicoGISCode(puertorico,roads)
+#     # toolkit.showAllCities()
+#     #
+#     # # Step 2b. City
+#     # toolkit.showSimpleCity(index=49)
+#     # #
+#     # # # Step 3. Grids
+#     # toolkit.showGridCity(index=49,cuadritos=50)
+#     # #
+#     # # # Step 4. roads
+#     # toolkit.showSpecificCity(index=49)
+#     # #
+#     # # # Step 5. Roads with grids
+#     # toolkit.showGridCityRoads(index=49,cuadritos=250)
+#     #
+#     # Step 6. Create Zone Points data/shapefile
+#     # toolkit.honeycomb(reso=10)
+#     toolkit.createPointsInHexData(show=True)
+#
+#
+#     # Main Step: Creates data of hex and rideID
+#     toolkit.ZoneIndicator()
+#     # Extras
+#     # toolkit.showAllColumns()
+#     # toolkit.split_polygon(index=49)
+# else:
+#     print("test wrong")

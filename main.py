@@ -4,6 +4,7 @@ import geopandas as gpd
 from RoadsPR import HexagonData
 from Preprocessing import datecolumns
 from redesigned import grouping
+import gc
 
 
 def main():
@@ -21,26 +22,44 @@ def main():
 
     :return:
     """
-
+    print("Loading files...")
     # Step 1
     filename = './Data/processed_ride_data_dic_24.xlsx'
     data = pd.read_excel(filename)
     puertorico = gpd.read_file(r'Shapefiles/pri_admbnda_adm1_2019.shp')
     roads = gpd.read_file(r'PRRoads/hotosm_pri_roads_lines.shp')
     # Step 2
-    GeoPR = PuertoRicoGISCode(puertorico,roads)
-    HexZones = GeoPR.ZoneIndicator(reso=10,show=False,data=data)
+    print("Creating Hexagonal Grid...")
+    print("Ignore warnings...")
+    GeoPR = PuertoRicoGISCode(puertorico,roads,index=49)
+    HexZones = GeoPR.ZoneIndicator(reso=10,show=True,data=data)
     # Step 3
-    NewData = HexagonData(data=HexZones)
+
+
+    print("Assigning zones to all rides...")
+    NewData = HexagonData(data=data, zone=HexZones)
     NewDataDF = NewData.mainOperation(output='./Output/Ride_data_with_hex.csv')
+
+
+    # Garbage collecting unused variables
+    del HexZones
+    del GeoPR
+    del puertorico
+    del roads
+
+    gc.collect()
     # Step 4
+
+    print("Create time interval")
+    # dates = datecolumns(step_interval=5) # 5 minutes
     dates = datecolumns(data=NewDataDF,step_interval=5) # 5 minutes
     datesDF = dates.intervalize()
     # Step 5
+    print("Transforming data aggregation...")
     prefinalized = grouping(datesDF)
 
     # TODO Final interval DF (horas solapadas)
-
+    print("...Done")
     return prefinalized
 
 if __name__=="__main__":

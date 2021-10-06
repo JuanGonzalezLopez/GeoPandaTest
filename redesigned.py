@@ -6,7 +6,11 @@ import math
 from multiprocessing import Pool
 
 class grouping():
-    def __init__(self,data):
+    def __init__(self,data=None, filename: str = './Output/PreprocessedIntervals.csv'):
+        if(not(type(data)==type(None))):
+            self.data = data
+        else:
+            self.data = pd.read_csv(filename)
         dataProd = data.groupby(['Hex_start','interval_start','day_of_year','year','dt']).size().reset_index(name='Production')
         dataProd = dataProd.rename(columns={'Hex_start':"Hex",'interval_start':"interval"})
 
@@ -18,10 +22,12 @@ class grouping():
         data['Production'] = data['Production'].astype(int)
         data['Attraction'] = data['Attraction'].astype(int)
 
-        print(data)
-        data.to_csv('Test_RunPA.csv')
-        return data
+        self.data = data
+    def returnDF(self,output='PreprocessedPreFinal.csv'):
 
+
+        self.data.to_csv(output,index=False)
+        return self.data
 
 def main():
     data = pd.read_csv("Test_Run.csv")

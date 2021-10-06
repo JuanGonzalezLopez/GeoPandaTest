@@ -110,7 +110,7 @@ class testingZones():
         plt.savefig('myimage.png', format='png', dpi=1200)
         plt.show()
         return self.joined
-    def hexcity(self,points,reso=10, show=True,filename='./ride_data/processed_ride_data_dic_24.xlsx'):
+    def hexcity(self,points,reso=10, show=True,filename='./Data/processed_ride_data_dic_24.xlsx'):
         if (0<=reso<10):
             resostring="h3_0"+str(reso)
         else:
@@ -173,7 +173,7 @@ class testingZones():
         points = gpd.GeoDataFrame(points, geometry=gpd.points_from_xy(points.Longitude, points.Latitude))
         return points
 
-    def StartEndConcat(self,filename='./ride_data/processed_ride_data_dic_24.xlsx'):
+    def StartEndConcat(self,filename='./Data/processed_ride_data_dic_24.xlsx'):
         pointsridesStart = self.createHullPoints(filename,target='start')
         pointsridesEnd = self.createHullPoints(filename,target='end')
         allpoints = pd.concat([pointsridesStart,pointsridesEnd]).reset_index(drop=True)
@@ -191,7 +191,7 @@ class testingZones():
 
         return allpoints
 
-    def honeycomb(self,reso=10, show=True,filename='./ride_data/processed_ride_data_dic_24.xlsx'):
+    def honeycomb(self,reso=10, show=True,filename='./Data/processed_ride_data_dic_24.xlsx'):
         if (0<=reso<10):
             resostring="h3_0"+str(reso)
         else:
@@ -204,18 +204,24 @@ class testingZones():
         mayaguez_grid = self.showGridCity(index=49, cuadritos=250)
 
 
-
-
         buffer = hull.buffer(.0005)
+        # Creates a GeoDataFrame from the buffer
 
         bufferdf = gpd.GeoDataFrame(geometry=gpd.GeoSeries(buffer))
         maya_grid_buffer = gpd.sjoin(mayaguez_grid, bufferdf)
+        # Joins the grid zonal system with the service area buffer system.
 
         points = self.points_from_polygons(maya_grid_buffer.geometry)
         points = np.array(points)
         geopoints = {"lng": points[:, 0], "lat": points[:, 1]}
+        # finds all the points from the grid's squares that are inside the service area. (corners of each square)
+        # convert to array.
+        # Converts to longitude and latitude coordinates (points->coordinates)
+        # Convert longitude and latitude dictionary to a dataframe that has a column for each.
 
         geopoints = pd.DataFrame(geopoints)
+        # from these longitude/latitude coordinates that came from the squares of the grid inside the Service area, we convert them to Hexagons.
+
         self.grid = geopoints.h3.geo_to_h3(reso)
         print(self.grid)
         self.grid = self.grid.drop(columns=['lng', 'lat']).groupby(resostring).sum()
@@ -240,7 +246,7 @@ class testingZones():
 
 
 
-    def ZoneIndicator(self,reso=10,show=False,filename='./ride_data/processed_ride_data_dic_24.xlsx'):
+    def ZoneIndicator(self,reso=10,show=False,filename='./Data/processed_ride_data_dic_24.xlsx'):
         self.honeycomb(reso=reso, show=show, filename=filename)
 
         temp_maya = self.grid.reset_index()
