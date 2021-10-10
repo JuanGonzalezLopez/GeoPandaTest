@@ -95,13 +95,6 @@ tool.plotCluster()
 
                 ###############################################
 
-
-
-
-
-
-
-
                 # kmeans = KMeans(n_clusters = 30, init ='k-means++')
                 # kmeans.fit(X[X.columns[1:3]]) # Compute k-means clustering.
                 # X['cluster_label'] = kmeans.fit_predict(X[X.columns[1:3]])
