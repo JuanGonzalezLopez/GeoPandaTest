@@ -58,21 +58,25 @@ class Clusters:
 
                 # Create DF with both lats and longs
                 #lol
-                newdf = pd.DataFrame()
+                newdf = {}
                 newdf["lat"] = lats
                 newdf["long"] = long
+
+                newdf = pd.DataFrame(newdf)
+
+                halflength = len(self.df[self.slat])
+
+
 
                 # Create Labels DF
                 labels1 = KMeans(n_clusters=self.clust).fit(newdf)
                 labels = labels1.labels_.astype(int)
 
-                labelsdf = pd.DataFrame()
-                labelsdf['labels'] = labels
+                self.df['start_cluster'] = labels[0:halflength]
+                self.df['end_cluster'] = labels[halflength:]
 
-                foo = pd.DataFrame
-                print(len(labelsdf))
+                print(self.df)
 
-                print(labelsdf)
 
                 # print(labels)
                 # print(len(labels))

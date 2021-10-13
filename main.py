@@ -4,6 +4,7 @@ import geopandas as gpd
 from RoadsPR import HexagonData
 from Preprocessing import datecolumns
 from redesigned import grouping
+from ClusterTest import Clusters
 import gc
 
 
@@ -54,9 +55,18 @@ def main():
     # dates = datecolumns(step_interval=5) # 5 minutes
     dates = datecolumns(data=NewDataDF,step_interval=5) # 5 minutes
     datesDF = dates.intervalize()
+
+
+    # Step 4b
+    print("Adding Clusters")
+    cluster = Clusters(datesDF,12)
+    dataClu= cluster.createCluster()
+
+
     # Step 5
     print("Transforming data aggregation...")
-    prefinalized = grouping(datesDF)
+    prefinalized = grouping(dataClu)
+    grData = prefinalized.returnDF()
 
     # TODO Final interval DF (horas solapadas)
     print("...Done")

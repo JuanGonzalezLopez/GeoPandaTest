@@ -8,9 +8,9 @@ from multiprocessing import Pool
 class grouping():
     def __init__(self,data=None, filename: str = './Output/PreprocessedIntervals.csv'):
         if(not(type(data)==type(None))):
-            self.data = data
+            data = data
         else:
-            self.data = pd.read_csv(filename)
+            data = pd.read_csv(filename)
         dataProd = data.groupby(['Hex_start','interval_start','day_of_year','year','dt']).size().reset_index(name='Production')
         dataProd = dataProd.rename(columns={'Hex_start':"Hex",'interval_start':"interval"})
 
@@ -22,17 +22,43 @@ class grouping():
         data['Production'] = data['Production'].astype(int)
         data['Attraction'] = data['Attraction'].astype(int)
 
+        data = data.sort_values(by=['dt', 'interval']).reset_index(drop=True)
+
+        unique = data['interval'].drop_duplicates(keep='first').sort_values().reset_index(drop=True)
+
+        emptydata = data.groupby(['Hex', 'day_of_year', 'year', 'dt'])['interval'].apply(
+            lambda grp: unique[~unique.isin(grp.values)]).reset_index().drop(['level_4'], axis=1)
+
+        emptydata['Attraction'] = 0
+        emptydata['Production'] = 0
+
+        data = pd.concat([data, emptydata]).reset_index(drop=True)
+
+
+        unique = data['Hex'].drop_duplicates(keep='first').sort_values().reset_index(drop=True)
+
+        emptydata = data.groupby(['interval', 'day_of_year', 'year', 'dt'])['Hex'].apply(
+            lambda grp: unique[~unique.isin(grp.values)]).reset_index().drop(['level_4'], axis=1)
+
+        emptydata['Attraction'] = 0
+        emptydata['Production'] = 0
+
+        data = pd.concat([data, emptydata]).reset_index(drop=True)
+
+        print(data)
+
         self.data = data
-    def returnDF(self,output='PreprocessedPreFinal.csv'):
+    def returnDF(self,output='./Output/PreprocessedPreFinal.csv'):
 
 
         self.data.to_csv(output,index=False)
         return self.data
 
 def main():
-    data = pd.read_csv("Test_Run.csv")
+    data = pd.read_csv("./Output/PrepoCluster.csv")
 
     inter = grouping(data)
+    resu = inter.returnDF()
 
     # df_splitted = parallelize_dataframe(data, use_preprocessing, n_cores=10)
 
