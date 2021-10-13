@@ -11,30 +11,90 @@ import csv
 
 class Clusters:
         # DF is the data from the rides
-        def __init__(self,df, clust = 12,target='start'):
+        def __init__(self,df, clust = 12):
+
                 self.df = df
                 self.clust = clust
-                self.target="new_"+target
+                start="new_start"
+                end="new_end"
+
+
+                self.slat = start+"_lat" #slat = "new_start_lat"
+                self.slong = start+"_long" #slat = "new_start_long"
+                self.elat = end+"_lat" #elat = "new_end_lat"
+                self.elong = end+"_long" #elat = "new_end_long"
 
         def createCluster(self):
-                latitude=self.target+"lat"
-                longitude = self.target+"long"
-                self.df = self.df[self.df[latitude] >= 17].reset_index(drop=True)  # Remove invalid coordinates
-                self.df.dropna(axis = 0, how = 'any', subset=[latitude, longitude], inplace = True)
-                X=self.df[:,[latitude,longitude]]
-                print(X)
-                self.kmeans = KMeans(n_clusters=self.clust).fit(self.df)
-                self.centroids = self.kmeans.cluster_centers_
-                print(self.kmeans)
-                print(self.centroids)
-                self.df['Labels'] = self.kmeans.labels_.astype(float)
-                print(self.df['Labels'])
-                self.latitude= latitude
-                self.longitude=longitude
+                # latitude=self.target+"lat"
+                #
+                # longitude = self.target+"long"
+                # self.df = self.df[self.df[latitude] >= 17].reset_index(drop=True)  # Remove invalid coordinates
+                # self.df.dropna(axis = 0, how = 'any', subset=[latitude, longitude], inplace = True)
+                # X=self.df[:,[latitude,longitude]]
+                # print(X)
+                Xstart= self.df[[self.slat,self.slong]]
+
+                self.kmeansStart = KMeans(n_clusters=self.clust).fit(Xstart)
+                self.df['start_cluster'] = self.kmeansStart.labels_.astype(int)
+                # print(df['start_cluster'])
+
+                Xend= self.df[[self.elat,self.elong]]
+
+
+                self.kmeansEnd = KMeans(n_clusters=self.clust).fit(Xend)
+                self.df['end_cluster'] = self.kmeansEnd.labels_.astype(int)
+
+                ####################################################################
+
+                # DF for Concatenated Lats and Longs
+
+                lats1 = self.df[self.slat]
+                lats2 = self.df[self.elat]
+                lats = pd.concat([lats1,lats2])
+
+                long1 =  self.df[self.slong]
+                long2 =  self.df[self.elong]
+                long = pd.concat([long1,long2])
+
+                # Create DF with both lats and longs
+                #lol
+                newdf = pd.DataFrame()
+                newdf["lat"] = lats
+                newdf["long"] = long
+
+                # Create Labels DF
+                labels1 = KMeans(n_clusters=self.clust).fit(newdf)
+                labels = labels1.labels_.astype(int)
+
+                labelsdf = pd.DataFrame()
+                labelsdf['labels'] = labels
+
+                foo = pd.DataFrame
+                print(len(labelsdf))
+
+                print(labelsdf)
+
+                # print(labels)
+                # print(len(labels))
+                # longs = [self.df[[self.slong, self.elong]]]
+
+                # print(newdf)
+                # print(len(newdf)) #mitad = 63,816
+
+                # newdf['lat'] = pd.concat[lats[self]]
+                # newdf['long'] = longs
+                # print(newdf)
+                # print(self.df)
+
+                self.df.to_csv('./Output/PrepoCluster.csv')
+                return self.df
+
+
+
 
         def plotCluster(self):
                 """
-                        Use ./Output/PreprocessedIntervals.csv as your df (when initializing object)
+                       Use ./Output/PreprocessedIntervals.csv as your df (when initializing object)
 
                         Create cluster labels using the new_ (start,long) _lat andnew_ (start,long) _long. [3,4,0,....1,9]
                         Do it for both start and end coordinates
