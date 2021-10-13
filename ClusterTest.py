@@ -47,10 +47,14 @@ class Clusters:
 
 
                 """
+
+
                 self.createCluster()
                 plt.scatter(self.df[self.longitude], self.df[self.latitude], c = self.kmeans.labels_.astype(float),s=50, alpha=0.5)
                 plt.scatter(self.centroids[:, 1], self.centroids[:, 0], c = 'red', s=50)
                 plt.show()
+
+
 
 
 df = pd.read_csv('./Output/PreprocessedIntervals.csv')
