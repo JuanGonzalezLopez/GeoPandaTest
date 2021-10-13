@@ -60,8 +60,8 @@ class Clusters:
 df = pd.read_csv('./Output/PreprocessedIntervals.csv')
 
 tool = Clusters(df)
-# tool.createCluster()
-tool.plotCluster()
+tool.createCluster()
+# tool.plotCluster()
                 # Elbow Curve: 12 Clusters
                 # K_clusters = range(1,100)
                 # kmeans = [KMeans(n_clusters=i) for i in K_clusters]
