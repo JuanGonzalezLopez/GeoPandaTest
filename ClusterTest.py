@@ -24,7 +24,7 @@ class Clusters:
                 self.elat = end+"_lat" #elat = "new_end_lat"
                 self.elong = end+"_long" #elat = "new_end_long"
 
-        def createCluster(self):
+        def createCluster(self,output='./Output/PrepoCluster.csv'):
                 # latitude=self.target+"lat"
                 #
                 # longitude = self.target+"long"
@@ -90,41 +90,41 @@ class Clusters:
                 # print(newdf)
                 # print(self.df)
 
-                self.df.to_csv('./Output/PrepoCluster.csv')
+                self.df.to_csv(output)
                 return self.df
 
 
 
 
-        def plotCluster(self):
-                """
-                       Use ./Output/PreprocessedIntervals.csv as your df (when initializing object)
-
-                        Create cluster labels using the new_ (start,long) _lat andnew_ (start,long) _long. [3,4,0,....1,9]
-                        Do it for both start and end coordinates
-                        Create column:
-                                self.df['cluster_start'] =  cluster labels of start
-                                self.df['cluster_end'] =  cluster labels of end
-                                self.df.to_csv('./Output/nombredecsv.csv')
-                        return self.df
-
-
-
-                """
-
-
-                self.createCluster()
-                plt.scatter(self.df[self.longitude], self.df[self.latitude], c = self.kmeans.labels_.astype(float),s=50, alpha=0.5)
-                plt.scatter(self.centroids[:, 1], self.centroids[:, 0], c = 'red', s=50)
-                plt.show()
-
-
+        # def plotCluster(self):
+        #         """
+        #                Use ./Output/PreprocessedIntervals.csv as your df (when initializing object)
+        #
+        #                 Create cluster labels using the new_ (start,long) _lat andnew_ (start,long) _long. [3,4,0,....1,9]
+        #                 Do it for both start and end coordinates
+        #                 Create column:
+        #                         self.df['cluster_start'] =  cluster labels of start
+        #                         self.df['cluster_end'] =  cluster labels of end
+        #                         self.df.to_csv('./Output/nombredecsv.csv')
+        #                 return self.df
+        #
+        #
+        #
+        #         """
+        #
+        #
+        #         self.createCluster()
+        #         plt.scatter(self.df[self.longitude], self.df[self.latitude], c = self.kmeans.labels_.astype(float),s=50, alpha=0.5)
+        #         plt.scatter(self.centroids[:, 1], self.centroids[:, 0], c = 'red', s=50)
+        #         plt.show()
 
 
-df = pd.read_csv('./Output/PreprocessedIntervals.csv')
 
-tool = Clusters(df)
-tool.createCluster()
+
+# df = pd.read_csv('./Output/PreprocessedIntervals.csv')
+
+# tool = Clusters(df)
+# # tool.createCluster()
 # tool.plotCluster()
                 # Elbow Curve: 12 Clusters
                 # K_clusters = range(1,100)

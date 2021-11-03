@@ -27,9 +27,9 @@ class HexagonData():
         columns = self.ride_data.columns.values
         for col in columns:
 
+
+
             print(col,self.ride_data[col].isnull().sum())
-
-
 
         self.ride_data['Hex_start'] = np.nan
         self.ride_data['Hex_end'] = np.nan

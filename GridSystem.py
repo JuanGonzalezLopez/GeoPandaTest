@@ -244,7 +244,7 @@ class PuertoRicoGISCode():
         self.joined.plot(ax=ax, color='red', edgecolor='black')
         self.df_city.boundary.plot(ax=ax, color='black')
 
-        plt.savefig('./Images_plots/GridCity.png', format='png', dpi=1200)
+        plt.savefig(self.output+'GridCity.png', format='png', dpi=1200)
         plt.show()
         return self.joined
 
@@ -319,7 +319,7 @@ class PuertoRicoGISCode():
         self.df_city.plot(color='red', edgecolor='black')
         plt.show()
 
-    def createHullPoints(self, filename: str='./Data/processed_ride_data_dic_24.xlsx', target: str = "start",data=None) -> object:
+    def createHullPoints(self, filename: str='./Data/processed_ride_data_dic_24.xlsx', target: str = "start",data=None,output="./Output/") -> object:
         """
         Will extract the coordinate floats from the columns inside the ride data and convert them to points.
             :param filename: the name of the data excel file
@@ -336,7 +336,7 @@ class PuertoRicoGISCode():
         points = df[['ride_id','target',lat,long]]
         points = points[points[lat] >= 17].reset_index(drop=True)
         points = points.rename(columns={lat: "Latitude", long: "Longitude"})
-        points.to_csv("./Output/Hull_" +target + ".csv",index=False)
+        points.to_csv(self.output+"Hull_" +target + ".csv",index=False)
         points = gpd.GeoDataFrame(points, geometry=gpd.points_from_xy(points.Longitude, points.Latitude))
         return points
     def createHullGeo(self,points):
@@ -355,7 +355,7 @@ class PuertoRicoGISCode():
 
 
         allpoints = allpoints[(allpoints["Latitude"] >= 17) & (allpoints["Longitude"] <= -65)].reset_index(drop=True)
-        allpoints.to_csv("./Output/allpoints.csv",index=False)
+        allpoints.to_csv(self.output+"allpoints.csv",index=False)
 
         print(allpoints)
 
@@ -413,7 +413,7 @@ class PuertoRicoGISCode():
         self.df_city.boundary.plot(ax=ax, color='black')
 
 
-        plt.savefig('./Images_plots/GridRoadCity.png', format='png', dpi=1200)
+        plt.savefig(self.output+'GridRoadCity.png', format='png', dpi=1200)
         plt.show()
         # grid.to_file("GridCities/"+str(self.city)+ ".shp")
 
@@ -478,7 +478,7 @@ class PuertoRicoGISCode():
 
             pointsrides.plot(ax=ax, color='red', edgecolor='black')
 
-            plt.savefig('./Images_plots/honeycomb.png', format='png', dpi=1200)
+            plt.savefig(self.output+'honeycomb.png', format='png', dpi=1200)
             plt.show()
     def createPointsInHexData(self,reso=10,show=False,filename='./Data/processed_ride_data_dic_24.xlsx'):
         self.honeycomb(reso=reso,show=show,filename=filename)
@@ -551,7 +551,7 @@ class PuertoRicoGISCode():
 
 
     def ZoneIndicator(self, reso: int = 10, show: bool = False, filename: str = './Data/processed_ride_data_dic_24.xlsx',
-                      output: str = "./Output/ride_hex_data.csv",data=None) -> object:
+                      output: str = "./Output/",data=None) -> object:
         """
         THIS IS A KEY STEP | IMPORTANT:
             This will go through EACH hex zone (bruteforce method, but it doesn't take that long, and it is has potential for multi-threading)
@@ -566,10 +566,10 @@ class PuertoRicoGISCode():
         """
 
 
+        self.output = output
+        print(self.output)
         self.honeycomb(reso=reso, show=show, filename=filename,data=data)
-
         temp_maya = self.grid.reset_index()
-        print(temp_maya)
         # mayageo = self.maya_hex_city['geometry']
         # temp_maya = temp_maya.drop(['index_right'], axis='columns')
         # grid_df = {}
@@ -580,7 +580,6 @@ class PuertoRicoGISCode():
         ride_id = []
         target = []
         points_geo = []
-        print(self.size)
         for i in range(0, self.size):
 
             invd_grid_square = temp_maya.iloc[[i]]
@@ -606,15 +605,12 @@ class PuertoRicoGISCode():
                 except:
                     pass
 
-        print(grid_id_points)
         points_df['Hex_ID'] = grid_id_points
         points_df['ride_id'] = ride_id
         points_df['target'] = target
         points_df['geometry'] = points_geo
-        print((len(grid_id_points),len(ride_id),len(target),len(points_geo)))
         points_df = pd.DataFrame(points_df)
-        print(points_df)
-        points_df.to_csv(output,index=False)
+        points_df.to_csv(self.output+"ride_hex_data.csv",index=False)
         return points_df
 
 # if __name__ =="__main__":

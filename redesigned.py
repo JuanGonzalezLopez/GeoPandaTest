@@ -6,16 +6,25 @@ import math
 from multiprocessing import Pool
 
 class grouping():
-    def __init__(self,data=None, filename: str = './Output/PreprocessedIntervals.csv'):
+    def __init__(self,parent,data=None, filename: str = './Output/PreprocessedIntervals.csv'):
+
+        if parent:
+            zone_start="start_cluster"
+            zone_end = "end_cluster"
+        else:
+            zone_start="Hex_start"
+            zone_end = "Hex_end"
+
+
         if(not(type(data)==type(None))):
             data = data
         else:
             data = pd.read_csv(filename)
-        dataProd = data.groupby(['Hex_start','interval_start','day_of_year','year','dt']).size().reset_index(name='Production')
-        dataProd = dataProd.rename(columns={'Hex_start':"Hex",'interval_start':"interval"})
+        dataProd = data.groupby([zone_start,'interval_start','day_of_year','year','dt']).size().reset_index(name='Production')
+        dataProd = dataProd.rename(columns={zone_start:"Hex",'interval_start':"interval"})
 
-        dataAttr = data.groupby(['Hex_end','interval_end','day_of_year','year','dt']).size().reset_index(name='Attraction')
-        dataAttr = dataAttr.rename(columns={'Hex_end':"Hex",'interval_end':"interval"})
+        dataAttr = data.groupby([zone_end,'interval_end','day_of_year','year','dt']).size().reset_index(name='Attraction')
+        dataAttr = dataAttr.rename(columns={zone_end:"Hex",'interval_end':"interval"})
 
         data = dataProd.merge(dataAttr, how='outer',left_on=['Hex','interval','day_of_year','year','dt'],right_on = ['Hex','interval','day_of_year','year','dt']).fillna(0)
         data['year'] = data['year'].astype(int)

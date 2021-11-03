@@ -6,12 +6,27 @@ import seaborn as sns; sns.set()
 import csv
 
 
-data = pd.read_csv('./Output/PreprocessedOverlapped.csv')
-print(len(data))
-# data = data[(data.mavg_po_hours) != 0 & (data.mavg_ao_hours != 0) ]
-data = data[(data.mavg_po_hours) != 0 & (data.mavg_ao_hours != 0)& (data.att_over != 0) & (data.prod_over != 0)]
+data = pd.read_csv('./Output/PrepoCluster.csv')
 
-print(len(data))
+temp=data.groupby(['Hex_start','start_cluster']).size().reset_index(name='hex_cluster')
+
+templog = temp.loc[temp['Hex_start'].isin(temp[temp.Hex_start.duplicated()]['Hex_start'])]
+
+unique = templog['Hex_start'].drop_duplicates(keep='first').sort_values().reset_index(drop=True)
+
+
+grouptemp = templog.groupby(['Hex_start'])
+
+
+tempchange = grouptemp.apply(lambda grp: grp.loc[grp['hex_cluster'].idxmax()])[['Hex_start','start_cluster']].reset_index(drop=True)
+
+nptempchange = tempchange['Hex_start'].to_numpy()
+def clusterchange(row):
+    if ( row['Hex_start'] in nptempchange):
+        row['start_cluster'] = tempchange.loc[tempchange['Hex_start']==(row['Hex_start'])]['start_cluster'].to_numpy()[0]
+    return row
+
+data = data.apply(clusterchange,axis=1)
 
 data.to_csv("./Output/Testtrimmingdata2.csv",index=False)
 

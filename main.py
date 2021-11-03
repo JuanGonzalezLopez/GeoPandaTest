@@ -5,6 +5,7 @@ from RoadsPR import HexagonData
 from Preprocessing import datecolumns
 from redesigned import grouping
 from ClusterTest import Clusters
+from solapado import overlap
 import gc
 
 
@@ -65,12 +66,16 @@ def main():
 
     # Step 5
     print("Transforming data aggregation...")
-    prefinalized = grouping(dataClu)
+    prefinalized = grouping(parent=True,data=dataClu)
     grData = prefinalized.returnDF()
 
-    # TODO Final interval DF (horas solapadas)
+
+    solapado = overlap(grData)
+    finalized= solapado.returnDF()
+
+    # TODO Dummies
     print("...Done")
-    return prefinalized
+    return finalized
 
 if __name__=="__main__":
     main()
