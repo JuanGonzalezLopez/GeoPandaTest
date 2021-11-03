@@ -80,7 +80,8 @@ class datecolumns():
 
 
     def dateify(self):
-        self.data['day_of_year'] = self.data.apply(self.day_of_year, axis=1)
+        # self.data['day_of_year'] = self.data.apply(self.day_of_year, axis=1)
+        self.data['day_of_year'] = self.data['dt'].dt.dayofyear
 
     # def intervalend(self,row):
     #
